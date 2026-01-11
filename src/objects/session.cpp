@@ -104,9 +104,6 @@ namespace engine {
                                                    state_->get_config()->remote_sessions_port_.load(
                                                        std::memory_order_acquire)));
 
-                SSL_set_tlsext_host_name(socket_.next_layer().native_handle(), state_->get_config()->remote_address_.data());
-                socket_.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification(state_->get_config()->remote_address_));
-
                 socket_.next_layer().async_handshake(
                     boost::asio::ssl::stream_base::client,
                     boost::beast::bind_front_handler(
@@ -151,6 +148,13 @@ namespace engine {
 
     void session::on_client_handshake(const boost::beast::error_code &ec) {
         if (ec) {
+            LOG_INFO(
+                "session_id=[{}] on_client_handshake ec=[{}:{}] msg=[{}]",
+                to_string(id_),
+                ec.category().name(),
+                ec.value(),
+                ec.message()
+            );
             state_->remove_session(id_);
             return;
         }
@@ -170,6 +174,13 @@ namespace engine {
 
     void session::on_server_handshake(const boost::beast::error_code &ec) {
         if (ec) {
+            LOG_INFO(
+                "session_id=[{}] on_server_handshake ec=[{}:{}] msg=[{}]",
+                to_string(id_),
+                ec.category().name(),
+                ec.value(),
+                ec.message()
+            );
             state_->remove_session(id_);
             return;
         }
@@ -191,11 +202,25 @@ namespace engine {
         boost::ignore_unused(bytes_transferred);
 
         if (ec == boost::beast::websocket::error::closed) {
+            LOG_INFO(
+                "session_id=[{}] on_read ec=[{}:{}] msg=[{}]",
+                to_string(id_),
+                ec.category().name(),
+                ec.value(),
+                ec.message()
+            );
             state_->remove_session(id_);
             return;
         }
 
         if (ec) {
+            LOG_INFO(
+                "session_id=[{}] on_read ec=[{}:{}] msg=[{}]",
+                to_string(id_),
+                ec.category().name(),
+                ec.value(),
+                ec.message()
+            );
             state_->remove_session(id_);
             return;
         }

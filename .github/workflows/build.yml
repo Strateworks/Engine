@@ -26,6 +26,6 @@ jobs:
 
       - name: Run build and test
         run: |
-          bash scripts/certificates.sh
+          bash scripts/certificates.sh 2048
           bash scripts/build.sh ${{ matrix.type }} ${{ matrix.link }} 4 tests_on
           bash scripts/test.sh ${{ matrix.type }} ${{ matrix.link }}

@@ -33,9 +33,6 @@ TEST_F(server_test, servers_accept_clients) {
         auto const _results = _resolver.resolve("localhost", std::to_string(_server->get_config()->clients_port_.load(std::memory_order_acquire)));
         boost::asio::connect(boost::beast::get_lowest_layer(_client), _results);
 
-        SSL_set_tlsext_host_name(_client.next_layer().native_handle(), "localhost");
-        _client.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
-
         const auto _host = fmt::format("localhost:{}", std::to_string(_server->get_config()->clients_port_.load(std::memory_order_acquire)));
 
         _client.next_layer().handshake(boost::asio::ssl::stream_base::client);
@@ -79,9 +76,6 @@ TEST_F(server_test, server_can_handle_subscribe) {
 
     auto const _results = _resolver.resolve("localhost", std::to_string(server_a_->get_config()->clients_port_.load(std::memory_order_acquire)));
     boost::asio::connect(boost::beast::get_lowest_layer(_client), _results);
-
-    SSL_set_tlsext_host_name(_client.next_layer().native_handle(), "localhost");
-    _client.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
 
     const auto _host = fmt::format("localhost:{}", std::to_string(server_a_->get_config()->clients_port_.load(std::memory_order_acquire)));
     _client.next_layer().handshake(boost::asio::ssl::stream_base::client);
@@ -132,13 +126,9 @@ TEST_F(server_test, assert_server_can_handle_publish) {
         auto const _results = _resolver.resolve("localhost", std::to_string(server_b_->get_config()->clients_port_.load(std::memory_order_acquire)));
 
         boost::asio::connect(boost::beast::get_lowest_layer(_client_a), _results);
-        SSL_set_tlsext_host_name(_client_a.next_layer().native_handle(), "localhost");
-        _client_a.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_a.next_layer().handshake(boost::asio::ssl::stream_base::client);
 
         boost::asio::connect(boost::beast::get_lowest_layer(_client_b), _results);
-        SSL_set_tlsext_host_name(_client_b.next_layer().native_handle(), "localhost");
-        _client_b.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_b.next_layer().handshake(boost::asio::ssl::stream_base::client);
     }
 
@@ -146,13 +136,9 @@ TEST_F(server_test, assert_server_can_handle_publish) {
         auto const _results = _resolver.resolve("localhost", std::to_string(server_c_->get_config()->clients_port_.load(std::memory_order_acquire)));
 
         boost::asio::connect(boost::beast::get_lowest_layer(_client_c), _results);
-        SSL_set_tlsext_host_name(_client_c.next_layer().native_handle(), "localhost");
-        _client_c.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_c.next_layer().handshake(boost::asio::ssl::stream_base::client);
 
         boost::asio::connect(boost::beast::get_lowest_layer(_client_d), _results);
-        SSL_set_tlsext_host_name(_client_d.next_layer().native_handle(), "localhost");
-        _client_d.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_d.next_layer().handshake(boost::asio::ssl::stream_base::client);
     }
 
@@ -285,13 +271,9 @@ TEST_F(server_test, assert_server_can_handle_broadcast) {
     {
         auto const _results = _resolver.resolve("localhost", std::to_string(server_b_->get_config()->clients_port_.load(std::memory_order_acquire)));
         boost::asio::connect(boost::beast::get_lowest_layer(_client_a), _results);
-        SSL_set_tlsext_host_name(_client_a.next_layer().native_handle(), "localhost");
-        _client_a.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_a.next_layer().handshake(boost::asio::ssl::stream_base::client);
 
         boost::asio::connect(boost::beast::get_lowest_layer(_client_b), _results);
-        SSL_set_tlsext_host_name(_client_b.next_layer().native_handle(), "localhost");
-        _client_b.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_b.next_layer().handshake(boost::asio::ssl::stream_base::client);
 
     }
@@ -300,13 +282,9 @@ TEST_F(server_test, assert_server_can_handle_broadcast) {
         auto const _results = _resolver.resolve("localhost", std::to_string(server_c_->get_config()->clients_port_.load(std::memory_order_acquire)));
 
         boost::asio::connect(boost::beast::get_lowest_layer(_client_c), _results);
-        SSL_set_tlsext_host_name(_client_c.next_layer().native_handle(), "localhost");
-        _client_c.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_c.next_layer().handshake(boost::asio::ssl::stream_base::client);
 
         boost::asio::connect(boost::beast::get_lowest_layer(_client_d), _results);
-        SSL_set_tlsext_host_name(_client_d.next_layer().native_handle(), "localhost");
-        _client_d.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_d.next_layer().handshake(boost::asio::ssl::stream_base::client);
     }
 
@@ -380,16 +358,12 @@ TEST_F(server_test, assert_server_can_handle_send) {
     {
         auto const _results = _resolver.resolve("localhost", std::to_string(server_b_->get_config()->clients_port_.load(std::memory_order_acquire)));
         boost::asio::connect(boost::beast::get_lowest_layer(_client_a), _results);
-        SSL_set_tlsext_host_name(_client_a.next_layer().native_handle(), "localhost");
-        _client_a.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_a.next_layer().handshake(boost::asio::ssl::stream_base::client);
     }
 
     {
         auto const _results = _resolver.resolve("localhost", std::to_string(server_c_->get_config()->clients_port_.load(std::memory_order_acquire)));
         boost::asio::connect(boost::beast::get_lowest_layer(_client_b), _results);
-        SSL_set_tlsext_host_name(_client_b.next_layer().native_handle(), "localhost");
-        _client_b.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_b.next_layer().handshake(boost::asio::ssl::stream_base::client);
     }
 
@@ -468,16 +442,12 @@ TEST_F(server_test, assert_server_can_handle_sync) {
     {
         auto const _results = _resolver.resolve("localhost", std::to_string(server_b_->get_config()->clients_port_.load(std::memory_order_acquire)));
         boost::asio::connect(boost::beast::get_lowest_layer(_client_a), _results);
-        SSL_set_tlsext_host_name(_client_a.next_layer().native_handle(), "localhost");
-        _client_a.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_a.next_layer().handshake(boost::asio::ssl::stream_base::client);
     }
 
     {
         auto const _results = _resolver.resolve("localhost", std::to_string(server_c_->get_config()->clients_port_.load(std::memory_order_acquire)));
         boost::asio::connect(boost::beast::get_lowest_layer(_client_b), _results);
-        SSL_set_tlsext_host_name(_client_b.next_layer().native_handle(), "localhost");
-        _client_b.next_layer().set_verify_callback(boost::asio::ssl::host_name_verification("localhost"));
         _client_b.next_layer().handshake(boost::asio::ssl::stream_base::client);
     }
 

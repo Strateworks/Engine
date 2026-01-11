@@ -67,11 +67,6 @@ namespace engine {
         std::string ssl_ca_certificate_ = "ca.crt";
 
         /**
-         * SSL Session Listener Password
-         */
-        std::string ssl_session_listener_password_ = "610191e8";
-
-        /**
          * SSL Session Listener Chain Certificate
          */
         std::string ssl_session_listener_chain_certificate_ = "session_listener.crt";
@@ -90,21 +85,6 @@ namespace engine {
          * SSL Session Private Key
          */
         std::string ssl_session_private_key_ = "session.key";
-
-        /**
-         * SSL Session DH Params
-         */
-        std::string ssl_session_dh_params_ = "session_dh4096.pem";
-
-        /**
-         * SSL Session Password
-         */
-        std::string ssl_session_password_ = "5ec35a12";
-
-        /**
-         * SSL Client Listener Password
-         */
-        std::string ssl_client_listener_password_ = "36e422f3";
 
         /**
          * SSL Client Listener Chain Certificate
@@ -127,14 +107,29 @@ namespace engine {
         std::string ssl_client_private_key_ = "client.key";
 
         /**
-         * SSL Client DH Params
+         * SSL DH Params
          */
-        std::string ssl_client_dh_params_ = "client_dh4096.pem";
+        std::string ssl_dh_params_ = "dhparams.pem";
+
+        /**
+         * SSL Session Password
+         */
+        std::string ssl_session_password_ = "5ec35a12";
+
+        /**
+         * SSL Session Listener Password
+         */
+        std::string ssl_session_listener_password_ = "610191e8";
 
         /**
          * SSL Client Password
          */
         std::string ssl_client_password_ = "d96ab300";
+
+        /**
+         * SSL Client Listener Password
+         */
+        std::string ssl_client_listener_password_ = "36e422f3";
     };
 } // namespace engine
 

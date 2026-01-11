@@ -32,7 +32,7 @@ namespace engine {
         session_listener_ssl_context_.set_password_callback([&](auto, auto) { return config_->ssl_session_listener_password_; });
         session_listener_ssl_context_.use_certificate_chain_file(config_->ssl_session_listener_chain_certificate_);
         session_listener_ssl_context_.use_private_key_file(config_->ssl_session_listener_private_key_, boost::asio::ssl::context::pem);
-        session_listener_ssl_context_.use_tmp_dh_file(config_->ssl_session_dh_params_);
+        session_listener_ssl_context_.use_tmp_dh_file(config_->ssl_dh_params_);
 
         session_ssl_context_.set_options(
            boost::asio::ssl::context::no_sslv2 | boost::asio::ssl::context::default_workarounds |
@@ -59,7 +59,7 @@ namespace engine {
         client_listener_ssl_context_.set_password_callback([&](auto, auto) { return config_->ssl_client_listener_password_; });
         client_listener_ssl_context_.use_certificate_chain_file(config_->ssl_client_listener_chain_certificate_);
         client_listener_ssl_context_.use_private_key_file(config_->ssl_client_listener_private_key_, boost::asio::ssl::context::pem);
-        client_listener_ssl_context_.use_tmp_dh_file(config_->ssl_client_dh_params_);
+        client_listener_ssl_context_.use_tmp_dh_file(config_->ssl_dh_params_);
 
         client_ssl_context_.set_options(
            boost::asio::ssl::context::no_sslv2 | boost::asio::ssl::context::default_workarounds |

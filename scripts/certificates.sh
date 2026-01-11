@@ -7,7 +7,7 @@ set -euo pipefail
 OUTDIR="$(cd "$(dirname "$0")" && pwd)/../build"
 mkdir -p "$OUTDIR"
 
-HOST=${1:-"localhost"}
+DH_PARAMS_SIZE=${1:-4096}
 CA_PASSWORD=${2:-"4df8489a"}
 SESSION_LISTENER_PASSWORD=${3:-"610191e8"}
 SESSION_PASSWORD=${4:-"5ec35a12"}
@@ -33,38 +33,37 @@ CLIENT_PASSWORD=${6:-"d96ab300"}
 # - client.crt PUBLIC
 
 # Generate a CA certificate:
-openssl req -new -newkey rsa:4096 -keyout "$OUTDIR/ca.key" -x509 -out "$OUTDIR/ca.crt" -subj "/CN=$HOST" -days 365 -passout pass:"$CA_PASSWORD"
+openssl req -new -newkey rsa:4096 -keyout "$OUTDIR/ca.key" -x509 -out "$OUTDIR/ca.crt" -subj "/CN=Authority" -days 365 -passout pass:"$CA_PASSWORD"
 
 ## Session
 
 # Generate a Session Listener CSR:
-openssl req -new -newkey rsa:4096 -keyout "$OUTDIR/session_listener.key" -out session_listener.csr -subj "/CN=$HOST" -addext "subjectAltName=DNS:$HOST" -passout pass:"$SESSION_LISTENER_PASSWORD"
+openssl req -new -newkey rsa:4096 -keyout "$OUTDIR/session_listener.key" -out session_listener.csr -subj "/CN=SessionListener" -passout pass:"$SESSION_LISTENER_PASSWORD"
 
 # Sign the Session Listener CSR using our CA:
 openssl x509 -req -in session_listener.csr -CA "$OUTDIR/ca.crt" -CAkey "$OUTDIR/ca.key" -copy_extensions copy -days 365 -out "$OUTDIR/session_listener.crt" -passin pass:"$CA_PASSWORD"
 
 # Generate a Session CSR:
-openssl req -new -newkey rsa:4096 -keyout "$OUTDIR/session.key" -out session.csr -subj "/CN=session" -passout pass:"$SESSION_PASSWORD"
+openssl req -new -newkey rsa:4096 -keyout "$OUTDIR/session.key" -out session.csr -subj "/CN=Session" -passout pass:"$SESSION_PASSWORD"
 
 # Sign the Session CSR using our CA:
 openssl x509 -req -in session.csr -CA "$OUTDIR/ca.crt" -CAkey "$OUTDIR/ca.key" -days 365 -out "$OUTDIR/session.crt" -passin pass:"$CA_PASSWORD"
 
-# Generate a Session DH parameters file:
-openssl dhparam -out "$OUTDIR/session_dh4096.pem" 4096
-
 ## Client
 
 # Generate a Client Listener CSR:
-openssl req -new -newkey rsa:4096 -keyout "$OUTDIR/client_listener.key" -out client_listener.csr -subj "/CN=$HOST" -addext "subjectAltName=DNS:$HOST" -passout pass:"$CLIENT_LISTENER_PASSWORD"
+openssl req -new -newkey rsa:4096 -keyout "$OUTDIR/client_listener.key" -out client_listener.csr -subj "/CN=ClientListener" -passout pass:"$CLIENT_LISTENER_PASSWORD"
 
 # Sign the Client Listener CSR using our CA:
 openssl x509 -req -in client_listener.csr -CA "$OUTDIR/ca.crt" -CAkey "$OUTDIR/ca.key" -copy_extensions copy -days 365 -out "$OUTDIR/client_listener.crt" -passin pass:"$CA_PASSWORD"
 
 # Generate a Client CSR:
-openssl req -new -newkey rsa:4096 -keyout "$OUTDIR/client.key" -out client.csr -subj "/CN=client" -passout pass:"$CLIENT_PASSWORD"
+openssl req -new -newkey rsa:4096 -keyout "$OUTDIR/client.key" -out client.csr -subj "/CN=Client" -passout pass:"$CLIENT_PASSWORD"
 
 # Sign the Client CSR using our CA:
 openssl x509 -req -in client.csr -CA "$OUTDIR/ca.crt" -CAkey "$OUTDIR/ca.key" -days 365 -out "$OUTDIR/client.crt" -passin pass:"$CA_PASSWORD"
 
-# Generate a Client DH parameters file:
-openssl dhparam -out "$OUTDIR/client_dh4096.pem" 4096
+# Generate DH Params:
+openssl dhparam -out "$OUTDIR/dhparams.pem" $DH_PARAMS_SIZE
+
+rm *.csr
