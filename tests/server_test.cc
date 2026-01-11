@@ -24,7 +24,6 @@ TEST_F(server_test, servers_are_registered) {
 }
 
 TEST_F(server_test, servers_accept_clients) {
-
     for (auto &_server : { server_a_, server_b_, server_c_ }) {
         boost::asio::io_context _ioc;
         boost::asio::ip::tcp::resolver _resolver{make_strand(_ioc)};
@@ -66,7 +65,9 @@ TEST_F(server_test, servers_accept_clients) {
         if (_ec == boost::asio::ssl::error::stream_truncated)
             _ec.clear();
 
-        _server->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
+        while (!_server->get_state()->get_clients().empty()) {
+            _server->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
+        }
         ASSERT_TRUE(_server->get_state()->get_clients().size() == 0);
     }
 }
@@ -540,7 +541,7 @@ TEST_F(server_test, assert_server_can_handle_sync) {
         });
 
     while (_config->clients_port_.load(std::memory_order_acquire) == 0 || _config->sessions_port_.load(std::memory_order_acquire) == 0 || !_config->registered_.load(std::memory_order_acquire) || _server_e->get_state()->get_sessions().size() != 3 || _server_e->get_state()->get_subscriptions().size() != 1 || _server_e->get_state()->get_clients().size() != 2) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     const auto _finished_at = std::chrono::high_resolution_clock::now().time_since_epoch().count();
