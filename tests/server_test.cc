@@ -66,8 +66,7 @@ TEST_F(server_test, servers_accept_clients) {
         if (_ec == boost::asio::ssl::error::stream_truncated)
             _ec.clear();
 
-        std::this_thread::sleep_for(std::chrono::seconds(3));
-
+        _server->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
         ASSERT_TRUE(_server->get_state()->get_clients().size() == 0);
     }
 }
@@ -188,7 +187,8 @@ TEST_F(server_test, assert_server_can_handle_publish) {
         _buffer.clear();
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    server_b_->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
+    server_c_->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
 
     _client_b.write(boost::asio::buffer(std::string(serialize(boost::json::object{
         {"transaction_id", to_string(boost::uuids::random_generator()())},
@@ -203,7 +203,8 @@ TEST_F(server_test, assert_server_can_handle_publish) {
         _buffer.clear();
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    server_b_->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
+    server_c_->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
 
     {
         boost::beast::flat_buffer _buffer;
@@ -231,7 +232,6 @@ TEST_F(server_test, assert_server_can_handle_publish) {
         ASSERT_EQ(_publish_object.as_object().at("params").as_object().at("payload").as_object().at("message").as_string(), "EHLO");
         _buffer.clear();
     }
-
 
     {
         boost::beast::flat_buffer _buffer;
@@ -336,7 +336,8 @@ TEST_F(server_test, assert_server_can_handle_broadcast) {
         _buffer.clear();
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    server_b_->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
+    server_c_->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
 
     for (const auto _client : { &_client_b, &_client_c, &_client_d })
     {
@@ -409,7 +410,8 @@ TEST_F(server_test, assert_server_can_handle_send) {
     const auto _server_c_host = fmt::format("localhost:{}", std::to_string(server_c_->get_config()->clients_port_.load(std::memory_order_acquire)));
     _client_b.handshake(_server_c_host, "/");
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    server_b_->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
+    server_c_->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
 
     boost::beast::flat_buffer _client_a_accepted_buffer;
     _client_a.read(_client_a_accepted_buffer);
@@ -440,7 +442,8 @@ TEST_F(server_test, assert_server_can_handle_send) {
         _buffer.clear();
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    server_b_->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
+    server_c_->get_state()->get_ioc().run_for(std::chrono::milliseconds(100));
 
     boost::beast::flat_buffer _buffer;
     _client_b.read(_buffer);
@@ -515,26 +518,30 @@ TEST_F(server_test, assert_server_can_handle_sync) {
 
     auto _server_e = std::make_shared<engine::server>();
 
+    const auto &_config = _server_e->get_config();
+    _config->sessions_port_.store(0, std::memory_order_release);
+    _config->clients_port_.store(0, std::memory_order_release);
+    _config->is_node_ = true;
+    _config->threads_ = 4;
+    _config->repl_enabled = false;
+
+    _config->remote_clients_port_.store(
+        server_a_->get_config()->clients_port_.load(std::memory_order_acquire), std::memory_order_release);
+    _config->remote_sessions_port_.store(
+        server_a_->get_config()->sessions_port_.load(std::memory_order_acquire),
+        std::memory_order_release);
+
     auto _thread_e = std::make_unique<std::jthread>([_server_e, this]() {
-            const auto &_config = _server_e->get_config();
-            _config->sessions_port_.store(0, std::memory_order_release);
-            _config->clients_port_.store(0, std::memory_order_release);
-            _config->is_node_ = true;
-            _config->threads_ = 4;
-            _config->repl_enabled = false;
-
-            _config->remote_clients_port_.store(
-                server_a_->get_config()->clients_port_.load(std::memory_order_acquire), std::memory_order_release);
-            _config->remote_sessions_port_.store(
-                server_a_->get_config()->sessions_port_.load(std::memory_order_acquire),
-                std::memory_order_release);
-
             LOG_INFO("starting server E");
             _server_e->start();
             LOG_INFO("server E stopped");
         });
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    while (_config->clients_port_.load(std::memory_order_acquire) == 0 || _config->sessions_port_.load(std::memory_order_acquire) == 0 || !_config->registered_.load(std::memory_order_acquire) || _server_e->get_state()->get_sessions().size() != 3) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    _server_e->get_state()->get_ioc().run_for(std::chrono::milliseconds(1000));
 
     ASSERT_EQ(_server_e->get_state()->get_subscriptions().size(), 1);
     ASSERT_EQ(_server_e->get_state()->get_clients().size(), 2);

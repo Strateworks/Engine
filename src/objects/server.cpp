@@ -99,7 +99,6 @@ namespace engine {
             LOG_INFO("state_id=[{}] action=[waiting for remote] remote_address=[{}] remote_sessions_port=[{}]", to_string(state_->get_id()),
                      _config->remote_address_, _config->remote_sessions_port_.load(std::memory_order_acquire));
 
-            std::this_thread::sleep_for(std::chrono::seconds(3));
             connect_to_remote();
         }
 
