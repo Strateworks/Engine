@@ -539,18 +539,12 @@ TEST_F(server_test, assert_server_can_handle_sync) {
             LOG_INFO("server E stopped");
         });
 
-    while (_config->clients_port_.load(std::memory_order_acquire) == 0 || _config->sessions_port_.load(std::memory_order_acquire) == 0 || !_config->registered_.load(std::memory_order_acquire) || _server_e->get_state()->get_sessions().size() != 3) {
+    while (_config->clients_port_.load(std::memory_order_acquire) == 0 || _config->sessions_port_.load(std::memory_order_acquire) == 0 || !_config->registered_.load(std::memory_order_acquire) || _server_e->get_state()->get_sessions().size() != 3 || _server_e->get_state()->get_subscriptions().size() != 1 || _server_e->get_state()->get_clients().size() != 2) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     const auto _finished_at = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-
     LOG_INFO("Time spend: {}ns", _finished_at - _start_at);
-
-    _server_e->get_state()->get_ioc().run_for(std::chrono::milliseconds(10));
-
-    ASSERT_EQ(_server_e->get_state()->get_subscriptions().size(), 1);
-    ASSERT_EQ(_server_e->get_state()->get_clients().size(), 2);
 
     _server_e->stop();
 }
