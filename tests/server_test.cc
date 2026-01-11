@@ -531,17 +531,23 @@ TEST_F(server_test, assert_server_can_handle_sync) {
         server_a_->get_config()->sessions_port_.load(std::memory_order_acquire),
         std::memory_order_release);
 
-    auto _thread_e = std::make_unique<std::jthread>([_server_e, this]() {
+    std::size_t _start_at = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+
+    auto _thread_e = std::make_unique<std::jthread>([_server_e, this, &_start_at]() {
             LOG_INFO("starting server E");
             _server_e->start();
             LOG_INFO("server E stopped");
         });
 
     while (_config->clients_port_.load(std::memory_order_acquire) == 0 || _config->sessions_port_.load(std::memory_order_acquire) == 0 || !_config->registered_.load(std::memory_order_acquire) || _server_e->get_state()->get_sessions().size() != 3) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
-    _server_e->get_state()->get_ioc().run_for(std::chrono::milliseconds(1000));
+    const auto _finished_at = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+
+    LOG_INFO("Time spend: {}ns", _finished_at - _start_at);
+
+    _server_e->get_state()->get_ioc().run_for(std::chrono::milliseconds(10));
 
     ASSERT_EQ(_server_e->get_state()->get_subscriptions().size(), 1);
     ASSERT_EQ(_server_e->get_state()->get_clients().size(), 2);

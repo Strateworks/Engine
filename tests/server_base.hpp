@@ -33,7 +33,7 @@ protected:
 
         LOG_INFO("waiting for server A ready");
         while (_server_a_config->clients_port_.load(std::memory_order_acquire) == 0 || _server_a_config->sessions_port_.load(std::memory_order_acquire) == 0) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
         const auto &_server_b_config = server_b_->get_config();
@@ -56,7 +56,7 @@ protected:
 
         LOG_INFO("waiting for server B ready");
         while (_server_b_config->clients_port_.load(std::memory_order_acquire) == 0 || _server_b_config->sessions_port_.load(std::memory_order_acquire) == 0) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
 
@@ -80,7 +80,7 @@ protected:
         });
 
         while (_server_c_config->clients_port_.load(std::memory_order_acquire) == 0 || _server_c_config->sessions_port_.load(std::memory_order_acquire) == 0 || !_server_c_config->registered_.load(std::memory_order_acquire) || server_c_->get_state()->get_sessions().size() != 2) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
 
@@ -95,8 +95,7 @@ protected:
         server_c_->stop();
 
         while (!server_a_->get_state()->get_ioc().stopped() || !server_b_->get_state()->get_ioc().stopped() || !server_c_->get_state()->get_ioc().stopped()) {
-            LOG_INFO("waiting for io stop ...");
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
         server_a_.reset();
         server_b_.reset();
