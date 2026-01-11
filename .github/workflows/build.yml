@@ -1,0 +1,31 @@
+# Copyright (c) 2025 Ian Torres <iantorres@outlook.com>.
+# All rights reserved.
+
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [1.87.0, 1.88.0, 1.89.0, 1.90.0]
+        type: [debug, release]
+        link: [shared, static]
+
+    container:
+      image: ghcr.io/strateworks/compiler:${{ matrix.version }}-${{ matrix.type }}-${{ matrix.link }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run build and test
+        run: |
+          bash scripts/certificates.sh
+          bash scripts/build.sh ${{ matrix.type }} ${{ matrix.link }} 4 tests_on
+          bash scripts/test.sh ${{ matrix.type }} ${{ matrix.link }}
