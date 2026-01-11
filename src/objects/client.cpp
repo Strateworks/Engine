@@ -105,6 +105,8 @@ namespace engine {
             state_->remove_client(id_);
             const auto _ = state_->leave_to_sessions(get_id());
             boost::ignore_unused(_);
+
+            do_tls_shutdown();
             return;
         }
 
@@ -112,6 +114,8 @@ namespace engine {
             state_->remove_client(id_);
             const auto _ = state_->leave_to_sessions(get_id());
             boost::ignore_unused(_);
+
+            do_tls_shutdown();
             return;
         }
 
@@ -197,6 +201,40 @@ namespace engine {
 
         auto _run_at = std::chrono::system_clock::now().time_since_epoch().count();
         _socket.async_accept(boost::beast::bind_front_handler(&client::on_accept, shared_from_this(), _run_at));
+    }
+
+    void client::do_tls_shutdown() {
+        if (!socket_.has_value())
+            return;
+
+        if (bool _expected = false; !tls_shutdown_started_.compare_exchange_strong(_expected, true))
+            return;
+
+        auto& ws = socket_.value();
+
+        if (!get_lowest_layer(ws).socket().is_open())
+            return;
+
+        ws.next_layer().async_shutdown(
+            boost::beast::bind_front_handler(
+                &client::on_tls_shutdown,
+                shared_from_this()));
+    }
+
+    void client::on_tls_shutdown(const boost::system::error_code &ec) {
+        if (ec && ec != boost::asio::ssl::error::stream_truncated) {
+            LOG_INFO("TLS shutdown error client_id=[{}] ec=[{}]",
+                     to_string(id_), ec.message());
+        }
+
+        if (!socket_.has_value())
+            return;
+
+        boost::system::error_code _ec;
+        auto& _ws = socket_.value();
+        get_lowest_layer(_ws).socket().shutdown(
+            boost::asio::ip::tcp::socket::shutdown_both, _ec);
+        get_lowest_layer(_ws).socket().close(_ec);
     }
 
 

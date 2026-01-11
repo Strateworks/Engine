@@ -126,6 +126,11 @@ namespace engine {
         std::vector<std::shared_ptr<std::string const> > queue_;
 
         /**
+         * TLS Shutdown Started
+         */
+        std::atomic<bool> tls_shutdown_started_{false};
+
+        /**
         * On Run
         */
         void on_run();
@@ -172,6 +177,18 @@ namespace engine {
          * @param ec
          */
         void on_handshake(const boost::beast::error_code &ec);
+
+        /**
+         * Do TLS Shutdown
+         */
+        void do_tls_shutdown();
+
+        /**
+         * On TLS Shutdown
+         *
+         * @param ec
+         */
+        void on_tls_shutdown(const boost::system::error_code& ec);
     };
 } // namespace engine
 

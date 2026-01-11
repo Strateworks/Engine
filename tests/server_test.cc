@@ -60,8 +60,11 @@ TEST_F(server_test, servers_accept_clients) {
 
         ASSERT_TRUE(_server->get_state()->get_clients().size() == 1);
 
-        boost::system::error_code ec;
-        _client.close(boost::beast::websocket::close_code::normal, ec);
+        boost::system::error_code _ec;
+        _client.close(boost::beast::websocket::close_code::normal, _ec);
+        _client.next_layer().shutdown(_ec);
+        if (_ec == boost::asio::ssl::error::stream_truncated)
+            _ec.clear();
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
@@ -110,8 +113,11 @@ TEST_F(server_test, server_can_handle_subscribe) {
     ASSERT_TRUE(_subscribe_object.as_object().contains("data"));
     ASSERT_TRUE(_subscribe_object.as_object().at("data").is_object());
 
-    boost::system::error_code ec;
-    _client.close(boost::beast::websocket::close_code::normal, ec);
+    boost::system::error_code _ec;
+    _client.close(boost::beast::websocket::close_code::normal, _ec);
+    _client.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
 }
 
 TEST_F(server_test, assert_server_can_handle_publish) {
@@ -253,11 +259,26 @@ TEST_F(server_test, assert_server_can_handle_publish) {
         ASSERT_EQ(_publish_object.as_object().at("params").as_object().at("payload").as_object().at("message").as_string(), "EHLO");
     }
 
-    boost::system::error_code ec;
-    _client_a.close(boost::beast::websocket::close_code::normal, ec);
-    _client_b.close(boost::beast::websocket::close_code::normal, ec);
-    _client_c.close(boost::beast::websocket::close_code::normal, ec);
-    _client_d.close(boost::beast::websocket::close_code::normal, ec);
+    boost::system::error_code _ec;
+    _client_a.close(boost::beast::websocket::close_code::normal, _ec);
+    _client_a.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
+
+    _client_b.close(boost::beast::websocket::close_code::normal, _ec);
+    _client_b.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
+
+    _client_c.close(boost::beast::websocket::close_code::normal, _ec);
+    _client_c.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
+
+    _client_d.close(boost::beast::websocket::close_code::normal, _ec);
+    _client_d.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
 }
 
 TEST_F(server_test, assert_server_can_handle_broadcast) {
@@ -342,11 +363,26 @@ TEST_F(server_test, assert_server_can_handle_broadcast) {
         _buffer.clear();
     }
 
-    boost::system::error_code ec;
-    _client_a.close(boost::beast::websocket::close_code::normal, ec);
-    _client_b.close(boost::beast::websocket::close_code::normal, ec);
-    _client_c.close(boost::beast::websocket::close_code::normal, ec);
-    _client_d.close(boost::beast::websocket::close_code::normal, ec);
+    boost::system::error_code _ec;
+    _client_a.close(boost::beast::websocket::close_code::normal, _ec);
+    _client_a.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
+
+    _client_b.close(boost::beast::websocket::close_code::normal, _ec);
+    _client_b.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
+
+    _client_c.close(boost::beast::websocket::close_code::normal, _ec);
+    _client_c.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
+
+    _client_d.close(boost::beast::websocket::close_code::normal, _ec);
+    _client_d.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
 }
 
 TEST_F(server_test, assert_server_can_handle_send) {
@@ -428,9 +464,16 @@ TEST_F(server_test, assert_server_can_handle_send) {
     ASSERT_EQ(_send_object.as_object().at("params").as_object().at("payload").as_object().at("message").as_string(), "EHLO");
 
 
-    boost::system::error_code ec;
-    _client_a.close(boost::beast::websocket::close_code::normal, ec);
-    _client_b.close(boost::beast::websocket::close_code::normal, ec);
+    boost::system::error_code _ec;
+    _client_a.close(boost::beast::websocket::close_code::normal, _ec);
+    _client_a.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
+
+    _client_b.close(boost::beast::websocket::close_code::normal, _ec);
+    _client_b.next_layer().shutdown(_ec);
+    if (_ec == boost::asio::ssl::error::stream_truncated)
+        _ec.clear();
 }
 
 TEST_F(server_test, assert_server_can_handle_sync) {

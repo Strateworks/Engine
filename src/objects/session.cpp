@@ -156,6 +156,8 @@ namespace engine {
                 ec.message()
             );
             state_->remove_session(id_);
+
+            do_tls_shutdown();
             return;
         }
 
@@ -182,6 +184,7 @@ namespace engine {
                 ec.message()
             );
             state_->remove_session(id_);
+            do_tls_shutdown();
             return;
         }
 
@@ -210,6 +213,7 @@ namespace engine {
                 ec.message()
             );
             state_->remove_session(id_);
+            do_tls_shutdown();
             return;
         }
 
@@ -222,6 +226,7 @@ namespace engine {
                 ec.message()
             );
             state_->remove_session(id_);
+            do_tls_shutdown();
             return;
         }
 
@@ -280,5 +285,32 @@ namespace engine {
                 boost::beast::bind_front_handler(
                     &session::on_write,
                     shared_from_this()));
+    }
+
+    void session::do_tls_shutdown() {
+        if (tls_shutdown_started_.exchange(true, std::memory_order_acq_rel))
+            return;
+
+        dispatch(
+            socket_.get_executor(),
+            [self = shared_from_this()] {
+                self->on_tls_shutdown(boost::system::error_code{});
+            }
+        );
+    }
+
+    void session::on_tls_shutdown(const boost::system::error_code &ec) {
+        socket_.next_layer().async_shutdown(
+            boost::beast::bind_front_handler(
+                &session::on_tls_shutdown_complete,
+                shared_from_this()
+            )
+        );
+    }
+
+    void session::on_tls_shutdown_complete(const boost::system::error_code &ec) {
+        boost::system::error_code ignored;
+        get_lowest_layer(socket_).socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored);
+        get_lowest_layer(socket_).socket().close(ignored);
     }
 } // namespace engine
