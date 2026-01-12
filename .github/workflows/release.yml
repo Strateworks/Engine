@@ -1,0 +1,41 @@
+# Copyright (c) 2025 — 2026 Ian Torres <iantorres@outlook.com>.
+# All rights reserved.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and upload
+
+    strategy:
+      fail-fast: false
+      matrix:
+        type: [debug, release]
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/strateworks/compiler:1.90.0-${{ matrix.type }}-static
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          bash scripts/build.sh ${{ matrix.type }} static 4 tests_off
+          mkdir -p dist
+          cp build/server dist/
+          cd dist && zip ${{ matrix.type }}.zip server
+
+      - name: Upload
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631
+        with:
+          files: dist/${{ matrix.type }}.zip

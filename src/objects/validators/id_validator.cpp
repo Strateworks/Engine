@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Ian Torres <iantorres@outlook.com>.
+// Copyright (c) 2025 — 2026 Ian Torres <iantorres@outlook.com>.
 // All rights reserved.
 
 #include <engine/validators/id_validator.hpp>
