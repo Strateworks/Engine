@@ -33,7 +33,9 @@ jobs:
           bash scripts/build.sh ${{ matrix.type }} static 4 tests_off
           mkdir -p dist
           cp build/server dist/
-          cd dist && zip ${{ matrix.type }}.zip server
+          cd dist
+          strip --strip-all server
+          zip ${{ matrix.type }}.zip server
 
       - name: Upload
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631
