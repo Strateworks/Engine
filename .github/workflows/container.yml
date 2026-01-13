@@ -32,34 +32,34 @@ jobs:
         run: mkdir -p build/certificates
 
       - name: Decode CI_CA_CRT
-        run: echo "${{ env.CI_CA_CRT }}" | base64 --decode > build/certificates/ca.crt
+        run: echo "${{ vars.CI_CA_CRT }}" | base64 --decode > build/certificates/ca.crt
 
       - name: Decode CI_CLIENT_CRT
-        run: echo "${{ env.CI_CLIENT_CRT }}" | base64 --decode > build/certificates/client.crt
+        run: echo "${{ vars.CI_CLIENT_CRT }}" | base64 --decode > build/certificates/client.crt
 
       - name: Decode CI_CLIENT_KEY
-        run: echo "${{ env.CI_CLIENT_KEY }}" | base64 --decode > build/certificates/client.key
+        run: echo "${{ vars.CI_CLIENT_KEY }}" | base64 --decode > build/certificates/client.key
 
       - name: Decode CI_CLIENT_LISTENER_CRT
-        run: echo "${{ env.CI_CLIENT_LISTENER_CRT }}" | base64 --decode > build/certificates/client_listener.crt
+        run: echo "${{ vars.CI_CLIENT_LISTENER_CRT }}" | base64 --decode > build/certificates/client_listener.crt
 
       - name: Decode CI_CLIENT_LISTENER_KEY
-        run: echo "${{ env.CI_CLIENT_LISTENER_KEY }}" | base64 --decode > build/certificates/client_listener.key
+        run: echo "${{ vars.CI_CLIENT_LISTENER_KEY }}" | base64 --decode > build/certificates/client_listener.key
 
       - name: Decode CI_SESSION_CRT
-        run: echo "${{ env.CI_SESSION_CRT }}" | base64 --decode > build/certificates/session.crt
+        run: echo "${{ vars.CI_SESSION_CRT }}" | base64 --decode > build/certificates/session.crt
 
       - name: Decode CI_SESSION_KEY
-        run: echo "${{ env.CI_SESSION_KEY }}" | base64 --decode > build/certificates/session.key
+        run: echo "${{ vars.CI_SESSION_KEY }}" | base64 --decode > build/certificates/session.key
 
       - name: Decode CI_SESSION_LISTENER_CRT
-        run: echo "${{ env.CI_SESSION_LISTENER_CRT }}" | base64 --decode > build/certificates/session_listener.crt
+        run: echo "${{ vars.CI_SESSION_LISTENER_CRT }}" | base64 --decode > build/certificates/session_listener.crt
 
       - name: Decode CI_SESSION_LISTENER_KEY
-        run: echo "${{ env.CI_SESSION_LISTENER_KEY }}" | base64 --decode > build/certificates/session_listener.key
+        run: echo "${{ vars.CI_SESSION_LISTENER_KEY }}" | base64 --decode > build/certificates/session_listener.key
 
       - name: Decode CI_DHPARAMS
-        run: echo "${{ env.CI_DHPARAMS }}" | base64 --decode > build/certificates/dhparams.pem
+        run: echo "${{ vars.CI_DHPARAMS }}" | base64 --decode > build/certificates/dhparams.pem
 
       - name: Build Docker image
         run: |
