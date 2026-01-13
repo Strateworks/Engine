@@ -36,10 +36,10 @@ WORKDIR /srv
 EXPOSE 11000
 EXPOSE 12000
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache netcat-openbsd
 
 HEALTHCHECK --interval=5s --timeout=5s --retries=3 \
-  CMD echo | openssl s_client -connect localhost:11000 -verify 0 > /dev/null 2>&1 || exit 1
+  CMD nc -z localhost 11000 || exit 1
 
 ENTRYPOINT ["/srv/server"]
 
