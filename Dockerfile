@@ -19,7 +19,6 @@ COPY --from=builder \
     /srv/
 
 COPY --from=builder \
-    /srv/build/certificates/ca.key \
     /srv/build/certificates/ca.crt \
     /srv/build/certificates/client.key \
     /srv/build/certificates/client.crt \
