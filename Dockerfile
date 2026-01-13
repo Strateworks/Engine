@@ -3,7 +3,7 @@ ARG LINK="static"
 
 FROM ghcr.io/strateworks/compiler:1.90.0-$VARIANT-$LINK AS builder
 
-ARG BUILD_THREADS=16
+ARG BUILD_THREADS=4
 ARG VARIANT="debug"
 ARG LINK="static"
 
